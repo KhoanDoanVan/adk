@@ -1,7 +1,7 @@
 
 from dotenv import load_dotenv
 import nest_asyncio
-from remote_agent_connection import RemoteAgentConnection
+from .remote_agent_connection import RemoteAgentConnection
 from a2a.types import (
   AgentCard,
   SendMessageRequest,
@@ -23,6 +23,7 @@ from typing import (List)
 import httpx
 import json
 import uuid
+import asyncio
 
 
 load_dotenv()
@@ -39,14 +40,14 @@ class LeadAgent:
   """
   def __init__(self):
     self._remote_agent_connections: dict[str, RemoteAgentConnection] = {}
-    self.cards: dict[str, AgentCard]
+    self.cards: dict[str, AgentCard] = {}
     self.agents: str = ""
     self._agent = self.create_lead_agent()
     self._user_id = "lead_agent"
     self._runner = Runner(
       app_name=self._agent.name,
       agent=self._agent,
-      artifact_servic=InMemorySessionService(),
+      artifact_service=InMemorySessionService(),
       session_service=InMemorySessionService(),
       memory_service=InMemoryMemoryService()
     )
@@ -93,7 +94,8 @@ class LeadAgent:
     remote_agent_addresses: List[str]
   ):
     instance = cls()
-    await instance
+    await instance._async_init_components(remote_agent_addresses=remote_agent_addresses)
+    return instance
 
 
   """
@@ -103,8 +105,8 @@ class LeadAgent:
     return Agent(
       model="gemini-2.5-flash-preview-05-20",
       name="Lead_Agent",
-      instruction=self.root_instructions,
-      description="This Lead Agent orchestrates mobile team with ios role - android role - flutter role",
+      instruction=self.lead_instructions,
+      description="This Lead Agent orchestrates mobile team",
       tools=[self.send_message]
     )
 
@@ -114,7 +116,11 @@ class LeadAgent:
   """
   def lead_instructions(self, context: ReadonlyContext) -> str:
     return f"""
+    **Role:** You are the Lead Agent, an expert mobile development for hifpt application. Your primary function is to coordinate with role agents to find a suitable to handle mobile issues.
     
+    <Available Agents>
+    {self.agents}
+    </Available Agents>
     """
   
 
@@ -186,7 +192,39 @@ class LeadAgent:
 
 
 
+def _get_initialized_lead_agent_sync():
+  """Synchronously creates and initializes the Lead Agent"""
 
+  async def _async_main():
+    # HARDCODED URLs for the role agents
+    role_agent_urls = [
+      "http://localhost:1001", # FLUTTER,
+      "http://localhost:1002", # IOS,
+      "http://localhost:1003" # ANDROID
+    ]
+
+    print("Initializing Lead Agent...")
+    lead_agent_instance = await LeadAgent.create(
+      remote_agent_addresses=role_agent_urls
+    )
+
+    print("Lead Agent initialized successfully!!!")
+    return lead_agent_instance.create_lead_agent()
+  
+  try:
+    return asyncio.run(_async_main())
+  except RuntimeError as e:
+    if "asyncio.run() cannot be called from a running event loop" in str(e):
+      print(
+        f"Warning: Could not initialized LeadAgent with asyncio.run(): {e}"
+        "This can happen if an event loop is already running (e.g., in Jupyter)"
+        "Consider initializing LeadAgent within an async function in your application"
+      )
+    else:
+      raise
+
+
+root_agent = _get_initialized_lead_agent_sync()
 
 
 
