@@ -1,4 +1,5 @@
 
+from datetime import datetime
 from dotenv import load_dotenv
 import nest_asyncio
 from .remote_agent_connection import RemoteAgentConnection
@@ -16,6 +17,7 @@ from a2a.client import (
 from google.adk import Agent
 from google.adk.agents.readonly_context import ReadonlyContext
 from google.adk.runners import Runner
+from google.adk.artifacts import InMemoryArtifactService
 from google.adk.sessions import InMemorySessionService
 from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
 from google.adk.tools.tool_context import ToolContext
@@ -47,7 +49,7 @@ class LeadAgent:
     self._runner = Runner(
       app_name=self._agent.name,
       agent=self._agent,
-      artifact_service=InMemorySessionService(),
+      artifact_service=InMemoryArtifactService(),
       session_service=InMemorySessionService(),
       memory_service=InMemoryMemoryService()
     )
@@ -118,6 +120,14 @@ class LeadAgent:
     return f"""
     **Role:** You are the Lead Agent, an expert mobile development for hifpt application. Your primary function is to coordinate with role agents to find a suitable to handle mobile issues.
     
+    **Core Directives:**
+
+    * **Get Skill of Agents:** When asked to get skills of agent, then use the `send_message` tool to ask that agents for get skill of their
+      *   Make sure you pass in the official name of the role agent for each message request.
+    * **Readability:** Make sure to respond in a concise and easy to read format (bullet points are good).
+
+    **Today's Date (YYYY-MM-DD):** {datetime.now().strftime("%Y-%m-%d")}
+
     <Available Agents>
     {self.agents}
     </Available Agents>
@@ -198,9 +208,9 @@ def _get_initialized_lead_agent_sync():
   async def _async_main():
     # HARDCODED URLs for the role agents
     role_agent_urls = [
-      "http://localhost:1001", # FLUTTER,
-      "http://localhost:1002", # IOS,
-      "http://localhost:1003" # ANDROID
+      "http://localhost:10001", # FLUTTER,
+      "http://localhost:10002", # IOS,
+      "http://localhost:10003" # ANDROID
     ]
 
     print("Initializing Lead Agent...")
