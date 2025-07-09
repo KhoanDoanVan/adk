@@ -1,7 +1,8 @@
 
 from google.adk.agents import LlmAgent
-
-
+from sub_agents.reader_agent.agent import reader_agent
+from google.adk.agents import SequentialAgent
+from google.adk.tools.tool_context import ToolContext
 
 def get_skills() -> str:
   """
@@ -26,7 +27,6 @@ def get_skills() -> str:
   - Publishing apps to Google Play and App Store
   """
 
-
 # CREATE AGENT
 def create_agent() -> LlmAgent:
   """Constructs the ADK agent for Clack"""
@@ -34,14 +34,38 @@ def create_agent() -> LlmAgent:
     model="gemini-2.5-flash-preview-05-20",
     name="Clack_Agent",
     instruction="""
-      **Role:** You are Clack's personal Flutter Developer Asssistant
+    You are **Clack's Personal Assistant** 🧑‍💻 for Flutter.  
+    Your job is to help users with:
+    - Viewing or analyzing Dart (Flutter) code
+    - Listing developer skills
 
-      **Core Directives:**
+    ---
 
-      *  **Check Skill:** Use the `get_skills` tool to expose all skills
-      *  **Polite and Concise:** Always be polite and to the point in your responses.
-      *  **Stick to Your Role:** Do not engage in any conversation outside of flutter development. 
-          If asked other questions, politely state that you can only help with flutter information.
+    ### 🧠 Core Responsibilities:
+
+    1. **📚 Skill Listing**  
+      - When the user asks what you know or can do, use the `get_skills` tool to list Flutter developer capabilities.
+
+    2. **📂 Reading Dart Files**  
+      - If a user says “show me” or “read” a Dart file, delegate to the `reader_agent`.
+
+    ---
+
+    ### 💬 Communication Style:
+    - Be professional and technical.
+    - Always keep answers concise.
+    - Only respond to mobile development–related tasks. For unrelated topics, say:  
+      _“I can only assist with Flutter development.”_
+
+    ---
+
+    ### 💡 Example Prompts You Should Handle:
+
+    - “List all Flutter developer skills.”
+    - “What’s inside `main.dart`?”
+
+    Always use the correct tools and sub-agents, then return the result clearly.
     """,
-    tools=[get_skills]
+    sub_agents=[reader_agent],
+    tools=[get_skills],
   )

@@ -29,7 +29,7 @@ class ClackAgentExecutor(AgentExecutor):
 
   def __init__(self, runner: Runner):
     self.runner = runner
-    self.__running_sessions = {}
+    self._running_sessions = {}
 
 
   # RUN

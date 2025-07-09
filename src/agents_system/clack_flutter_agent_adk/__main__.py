@@ -50,7 +50,7 @@ def main():
 
     skill = AgentSkill(
       id="check_skill",
-      name="Check Clack's Flutter Development Skills",
+      name="Check Clack's Flutter Development",
       description="Checks Clack's skills for flutter development on a given skills.",
       tags=["flutter_code", "read_flutter_file"],
       examples=["Does Clack can to write the UI Flutter code?"]
@@ -72,9 +72,7 @@ def main():
     runner = Runner(
       app_name=agent_card.name,
       agent=adk_agent,
-      artifact_service=InMemoryArtifactService(),
-      session_service=InMemorySessionService(),
-      memory_service=InMemoryMemoryService()
+      session_service=InMemorySessionService()
     )
 
     agent_executor = ClackAgentExecutor(runner=runner)

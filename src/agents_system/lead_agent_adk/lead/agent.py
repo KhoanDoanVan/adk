@@ -109,7 +109,8 @@ class LeadAgent:
       name="Lead_Agent",
       instruction=self.lead_instructions,
       description="This Lead Agent orchestrates mobile team",
-      tools=[self.send_message]
+      tools=[self.send_message],
+      output_key="data_conversation"
     )
 
 
@@ -124,6 +125,7 @@ class LeadAgent:
 
     * **Get Skill of Agents:** When asked to get skills of agent, then use the `send_message` tool to ask that agents for get skill of their
       *   Make sure you pass in the official name of the role agent for each message request.
+    * **Convert Code:** When asked to convert code, then use the `send_message` tool to ask propriate agent
     * **Readability:** Make sure to respond in a concise and easy to read format (bullet points are good).
 
     **Today's Date (YYYY-MM-DD):** {datetime.now().strftime("%Y-%m-%d")}
